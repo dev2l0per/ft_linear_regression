@@ -1,4 +1,5 @@
 import sys
+import os
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -32,6 +33,8 @@ def estimate_price(data, theta):
 	return tmp_data
 
 def train(data, theta, learning_rate, iteration, origin):
+	bias_err = []
+	weight_err = []
 	for ith in range(iteration):
 		temp_theta = theta[len(theta) - 1]
 		weight_arr = []
@@ -44,19 +47,28 @@ def train(data, theta, learning_rate, iteration, origin):
 		# print(weight_arr)
 		print('bias mean : ' + str(np.mean(bias_arr)) + ' weight mean : ' + str(np.mean(weight_arr)))
 		# plot_data(origin, denormalize(estimate_price(data, temp_theta), origin)[:, 0], denormalize(estimate_price(data, temp_theta), origin)[:, 1])
+		bias_err.append(np.mean(bias_arr))
+		weight_err.append(np.mean(weight_arr))
+		# plt.plot(np.mean(bias_arr), np.mean(weight_arr), 'o')
+		# plt.show()
 		temp_theta[0] = temp_theta[0] - (learning_rate * np.mean(bias_arr))
 		temp_theta[1] = temp_theta[1] - (learning_rate * np.mean(weight_arr))
 		theta = np.concatenate((theta, temp_theta.reshape((1, -1))), axis = 0)
 		print('theta0 : ' + str(temp_theta[0]) + ' theta1 : ' + str(temp_theta[1]))
+	# if os.path.exists("./theta_after_train.csv"):
+	# 	os.remove("./theta_after_train.csv")
+	plt.plot(bias_err, weight_err, '-ok')
+	plt.show()
 	df = pd.DataFrame(theta)
-	df.to_csv("theta_after_train.csv")
+	df.to_csv("./theta.csv", mode='w+', index=False)
 	return theta
 
 def	main():
-	learning_rate = 0.05
+	learning_rate = 0.2
 	iteration = 100
 
-	theta = getTheta()
+	# theta = getTheta()
+	theta = np.zeros((1, 2))
 	data = getData()
 	data_normalize = normalize(data)
 
